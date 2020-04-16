@@ -35,5 +35,12 @@ python3 reid_main.py\
     --pretrain_model_name MODEL_DIR/$MODEL_NAME\
 ```
 
+### Evaluation 
+We use two evaluation protocols for evaluating the performance of the model
+```
+- Rank-K accuracy
+- mAP (Mean Average Accuracy)
+```
+
 ## Citation
 We used [ARN](https://github.com/yujheli/ARN/blob/master/README.md) as the baseline for our model
