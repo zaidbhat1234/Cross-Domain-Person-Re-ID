@@ -5,10 +5,12 @@ Pytorch implementation for the above architecture for Cross Domain Person Re-Ide
 ## Prerequisites
 - Python 3
 - [Pytorch](https://pytorch.org/)
+- TensorFlow
+- TensorBoard
 ## Getting Started
 
 ### Datasets
-We conduct experiments on [Market1501](http://www.liangzheng.org/Project/project_reid.html), [DukeMTMC-reID](https://github.com/layumi/DukeMTMC-reID_evaluation)
+We conduct experiments on [Market1501](http://www.liangzheng.org/Project/project_reid.html), [CUHK03](https://drive.google.com/file/d/1pBCIAGSZ81pgvqjC-lUHtl0OYV1icgkz/view)
 - Create directories for datasets:
 ```
 mkdir datasets
@@ -38,9 +40,29 @@ python3 reid_main.py\
 ### Evaluation 
 We use two evaluation protocols for evaluating the performance of the model
 ```
-- Rank-K accuracy
+- Rank accuracy
 - mAP (Mean Average Accuracy)
 ```
+
+## Architecture
+The model consists of two encoders( Identity and Pose). ResNet-50 pre-trained on ImageNet is used as backbone for both encoders. The images(224x224x3) are normalised and then passed into the encoders. The encoders output feature-maps(2048x7x7) which are Max-Pooled to output feature vectors(2048).
+
+The feature maps from the two encoders are concatenated to obtain a feature-map(4096x7x7) which is fed into the decoder. We also implement the latent decoder with fully convolutional network and it outputs reconstructed images(224x224x3). The feature vectors are used to calculate losses. The aim of this model is to separate identity discriminative and identity irrelevant information in a way that is generalisable to other datasets by removing all identity, pose and background information.
+
+## Code Descriptions
+The code is arranged in the following files
+
+### Reid_main.py 
+Consists of the main python file where we call functions from the different python files
+### Reid_network.py 
+Consists of the code for creating the encoder-decoder architecture and the classifier
+### Reid_loss.py
+Consists of code for the various loss functions used in the architecture
+### Reid_dataset.py 
+Consists of code for the data loader for our datasets.
+### Reid_evaluate.py 
+Consists of code for the two evaluation protocols used (i.e, Rank and mAP accuracy)
+
 
 ## Citation
 We used [ARN](https://github.com/yujheli/ARN/blob/master/README.md) as the baseline for our model
