@@ -1,6 +1,7 @@
 # Cross-Domain-Person-Re-ID
 <p align="center"><img src='Architecture_.jpg' width="1000px"></p>
 Pytorch implementation for the above architecture for Cross Domain Person Re-Identification. This version of code is the draft.
+
 ## Prerequisites
 - Python 3
 - [Pytorch](https://pytorch.org/)
