@@ -63,6 +63,11 @@ Consists of code for the data loader for our datasets.
 ### Reid_evaluate.py 
 Consists of code for the two evaluation protocols used (i.e, Rank and mAP accuracy)
 
+## Experiments 
+- Passing images mapped with binary saliency maps to ignore the background information
+### robust_saliency.py
+Consists of code to create binary saliency maps of the images in datasets
+- Passing jittered images into the Pose Encoder so that the decoder is forced to take identity information from the identity encoder
 
 ## Citation
 We used [ARN](https://github.com/yujheli/ARN/blob/master/README.md) as the baseline for our model
