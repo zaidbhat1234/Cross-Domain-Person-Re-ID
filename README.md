@@ -34,3 +34,6 @@ python3 reid_main.py\
     --batch_size 16\
     --pretrain_model_name MODEL_DIR/$MODEL_NAME\
 ```
+
+## Citation
+We used [ARN](https://github.com/yujheli/ARN/blob/master/README.md) as the baseline for our model
