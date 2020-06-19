@@ -91,21 +91,15 @@ def save_epoch(epoch):
 def train():
     print('Model name: {}'.format(args.model_name))
     classifier_output_dim = config.get_dataoutput(args.source_dataset)
-    
     model = AdaptReID_model(backbone='resnet-50', classifier_output_dim=classifier_output_dim).cuda()
     # print(model.state_dict())
-    
-    
     #Load pretrained model after saving it
     if args.pretrain_model_name is not None:
         print("Loading pre-trained model")
         model.load_state_dict(torch.load('{}/{}.pth.tar'.format(args.model_dir, args.pretrain_model_name)))
-    
-    
     sourceData = AdaptReID_Dataset(dataset_name=args.source_dataset, mode='source', transform=trans.Compose(transform_list),batch_size = args.batch_size)
     sourceDataloader = DataLoader(sourceData, batch_size=args.batch_size, shuffle=True)
     source_iter = enumerate(sourceDataloader)
-
     """
     #DataLoader for target dataset
     targetData = AdaptReID_Dataset(dataset_name=args.target_dataset, mode='train',
@@ -113,41 +107,27 @@ def train():
 
     targetDataloader = DataLoader(targetData, batch_size=args.batch_size)
     target_iter = enumerate(targetDataloader)"""
-
     unique_list = sourceData.unique_list
-
-    
     model_opt = optim.SGD(filter(lambda p: p.requires_grad, model.parameters()), lr=args.learning_rate, momentum=0.9, weight_decay=0.0005)
     writer = SummaryWriter('/media/zaid/zaid1/log/{}'.format(args.model_name))
     match, junk = None, None
-  
-
     for epoch in range(args.total_epochs):
         for batch_idx in range(total_batch):
             model.train()
-
             step = epoch*total_batch + batch_idx
-            
             print('{}: epoch: {}/{} step: {}/{} ({:.2f}%)'.format(args.model_name, epoch+1, args.total_epochs, step+1, total_batch, float(batch_idx+1)*100.0/total_batch))
-
             #Source DataLoader
             sourceDataloader = DataLoader(sourceData, batch_size=args.batch_size, pin_memory= True)  # Creates iterale dataset , shuffle ensures random selection of batches from dataset
-
             source_iter = enumerate(sourceDataloader) #total images/batch size = number of time to run in each epoch to test all images.
-            
             #Get Batch of source image
             source_batch, source_iter = get_batch(source_iter, sourceDataloader)
             source_image, source_label, _,idxx = split_datapack(source_batch)
-
-            
             #Get Batch of source image positive anchor
             source_batch_1, source_iter = get_batch(source_iter, sourceDataloader)
             source_image1, source_label1, _,idxx = split_datapack(source_batch_1)
-            
             #Get Batch of source image negative anchor
             source_batch_neg, source_iter = get_batch(source_iter, sourceDataloader)
             source_image_neg, source_label_neg, _,idxx = split_datapack(source_batch_neg)
-            
             """target_batch, target_iter = get_batch(target_iter, targetDataloader)
             target_image, target_label, _,idxx = split_datapack(target_batch)"""
             
@@ -157,8 +137,6 @@ def train():
                 alias_index[ind] = unique_list.index(source_label[ind].data)
             #alias_index = alias_index%50 #if 50 id's chosen at random
             #print("LL",alias_index)
-            
-            
             """
                 recon_img = reconstructed image having same pose as positive anchor and appearance as source image
                 feature = identity embedding corresponding to source image
@@ -166,9 +144,7 @@ def train():
                 feature2 = identity embedding corresponding to negative image
                 feature_or = pose embedding corresponding to positive anchor
                 pred_s = predicted labels for the source image by the classifier in the model
-                
                 """
-            
             recon_img,feature,feature1,feature2,feature_or,pred_s = model(source_img=source_image,target_img = source_image1,negative_img=source_image_neg, flag = 1)
             loss_rec = loss_rec_func(recon_img,tb_visualize(source_image1))
             loss_dif = loss_dif_func(feature,  feature_or) #orthogonality loss
@@ -177,21 +153,15 @@ def train():
             loss_mse_func = torch.nn.MSELoss()
             loss_app = loss_mse_func(feature,feature1) #appearance loss
             loss = loss_cls +loss_rec +loss_dif + loss_app
-           
-            
-           
             """
                 Writing Images and Losses to logs for tensorboard
                 """
-            
             if (step+1)%1000==0:
                 writer.add_scalar('loss_ortho', loss_dif, step)
                 
                 source_image = tb_visualize(source_image)
                 source_image_ = make_grid(source_image)
                 writer.add_image('source image', source_image_, step)
-                
-                
                 source_image1 = tb_visualize(source_image1)
                 source_image_1 = make_grid(source_image1)
                 writer.add_image('source image pos', source_image_1, step)
@@ -211,12 +181,9 @@ def train():
                 #writer.add_scalar('loss_trip', loss_trip, step)
                 writer.add_scalar('loss_app', loss_app, step)
                 writer.add_scalar('loss', loss, step)
-                
                 save_model(model, step)
             #save_epoch(epoch)
-
             #update model
-            
             model_opt.zero_grad()
             loss.backward()
             model_opt.step()
